@@ -1,0 +1,200 @@
+{"id": "multiple_0", "result": "spotify.play(artist='Maroon 5', duration=15)"}
+{"id": "multiple_1", "result": "calculate_em_force(b_field=5, area=2, d_time=10)"}
+{"id": "multiple_2", "result": "calculate_resistance(length=5, area=0.01, resistivity='copper')"}
+{"id": "multiple_3", "result": "protein_info.get_sequence_and_3D(protein_name='rat hemoglobin', model_3d=True)"}
+{"id": "multiple_4", "result": "calculate_bmi(height=5.6, weight=60)"}
+{"id": "multiple_5", "result": "streaming_services.shows_list_and_ratings(streaming_service='Netflix', show_list=['Friends'], sort_by_rating=True)"}
+{"id": "multiple_6", "result": "calculate_sales_tax(purchase_amount=11.23, city='Portland', state='OR')"}
+{"id": "multiple_7", "result": "math.factorial(number=15)"}
+{"id": "multiple_8", "result": "database_us_census.get_population(area='USA', type='country')"}
+{"id": "multiple_9", "result": "find_movie_showing(location='San Diego', movie=['Tenet', 'No Time To Die'], time=['5 pm', '7:30 pm'])"}
+{"id": "multiple_10", "result": "math.pythagoras(a=5, b=12)"}
+{"id": "multiple_11", "result": "ml.predict_house_price(location='Los Angeles', size=4000)"}
+{"id": "multiple_12", "result": "model.DecisionTreeClassifier(criterion='entropy', max_depth=10, random_state=1)"}
+{"id": "multiple_13", "result": "confidence_interval.calculate(sample_std_dev=10, sample_size=150, sample_mean=25, confidence_level=0.95)"}
+{"id": "multiple_14", "result": "[calculate_present_value(payment_per_year=1000, interest_rate=0.05, years=10), calculate_present_value(payment_per_year=1000, interest_rate=0.05, years=30), calculate_present_value(payment_per_year=1000, interest_rate=0.05, years=20), calculate_present_value(payment_per_year=1000, interest_rate=0.05, years=30)]"}
+{"id": "multiple_15", "result": "calculate_capital_gains_tax(short_term_gain=20000, long_term_gain=50000, state='FL')"}
+{"id": "multiple_16", "result": "calculate_return_on_investment(initial_investment=5000, gain_loss=-1000)"}
+{"id": "multiple_17", "result": "get_stock_data(symbol='MSFT', data_points=['price', 'volume'])"}
+{"id": "multiple_18", "result": "financials.calculate_future_value(present_value=1000, annual_interest_rate=0.05, number_of_years=10)"}
+{"id": "multiple_19", "result": "calculate_mortgage_payment(loan_amount=400000, interest_rate=0.04, loan_term=30)"}
+{"id": "multiple_20", "result": "loan_eligibility_check(financial_institution='Wells Fargo', loan_amount=700000, annual_income=120000)"}
+{"id": "multiple_21", "result": "law_crimes.search(crime='money laundering', location='Texas', year=2018)"}
+{"id": "multiple_22", "result": "[court_info.get_case_status(case_number='GH5678', court='Orange County Court', details='trial_date'), court_info.get_case_status(case_number='XY1234', court='Los Angeles County Court', details='status')]"}
+{"id": "multiple_23", "result": "alimony_calculator.ca.calculate(payor_income=10000, recipient_income=3000, duration=20)"}
+{"id": "multiple_24", "result": "law_case.get_details(case_number='64725', include_history=True, include_litigants=True)"}
+{"id": "multiple_25", "result": "lawsuit.lookup(company_name='Dara Inc', year=2018)"}
+{"id": "multiple_26", "result": "court_case.find(location='New York District', case_number=['71249'], case_type='Civil')"}
+{"id": "multiple_27", "result": "nature_reserve.find_nearby(location='Tokyo', amenities=['Playgrounds', 'Biking Trails'], proximity=5)"}
+{"id": "multiple_28", "result": "get_current_and_future_temperature(location='Los Angeles', hours=3)"}
+{"id": "multiple_29", "result": "waste_calculation.calculate(population={'adults': [0], 'children': [0], 'singles': [1]}, location='New York')"}
+{"id": "multiple_30", "result": "book_flight(departure_city='Tokyo', destination_city='Sydney', date='2022-05-18')"}
+{"id": "multiple_31", "result": "history_fact.fetch(event='Magna Carta')"}
+{"id": "multiple_32", "result": "us_history.events_by_presidency(president_name='George Washington')"}
+{"id": "multiple_33", "result": "get_president_and_vp(year=2011, position='vice president')"}
+{"id": "multiple_34", "result": "religion_history.track(region='Turkey', religion='Christianity', start_year=100, end_year=1500)"}
+{"id": "multiple_35", "result": "ancient_empires.get_religion_info(empire_name='Mauryan Empire', include_influences=True)"}
+{"id": "multiple_36", "result": "[paint_color_mixture(paint_type='Acrylic', color='Navy'), paint_color_mixture()]"}
+{"id": "multiple_37", "result": "color_converter.get_color_info(color_name='maroon', conversion_type=['RGB', 'HEX'])"}
+{"id": "multiple_38", "result": "calc_distance(start_loc='Los Angeles', end_loc='San Francisco', shortest_route=True)"}
+{"id": "multiple_39", "result": "museum_info.get_info(location='Paris', details=['Opening hours', 'Adult tickets', 'Child tickets'])"}
+{"id": "multiple_40", "result": "museum.exhibition_detail(exhibition_name='Wonder of Nature', museum_name='Louvre', visitor_type=['child', 'adult'])"}
+{"id": "multiple_41", "result": "find_music_instrument_store(location='Chicago, IL', instruments=['Yamaha Acoustic Guitar', 'Kawai Piano'])"}
+{"id": "multiple_42", "result": "check_instrument_availability(instrument='Yamaha P125', city='Madrid')"}
+{"id": "multiple_43", "result": "concert_finder(location='New York, New York', music_genre='jazz', time_period=30)"}
+{"id": "multiple_44", "result": "concert.find_nearby(location='Paris', date='next Friday', genre='Classical', amenities=['Parking'])"}
+{"id": "multiple_45", "result": "musicCharts.getMostPlayed(genre='Rock', region='Australia')"}
+{"id": "multiple_46", "result": "[calculate_winning_percentage(team='Bulls', season=2020), calculate_winning_percentage(team='Lakers', season=2018), calculate_winning_percentage(team='Lakers', season=2020)]"}
+{"id": "multiple_47", "result": "get_team_ranking(team='Manchester United', league='La Liga')"}
+{"id": "multiple_48", "result": "PokemonGO.get_moves(pokemon='Pikachu')"}
+{"id": "multiple_49", "result": "player_status.check(team='RocketLeague', player_id=3142, season=2019)"}
+{"id": "multiple_50", "result": "game.save_progress(stage=3, mode='hard', level='user')"}
+{"id": "multiple_51", "result": "recipe_search.find(dish='Chicken Noodle Soup')"}
+{"id": "multiple_52", "result": "restaurant_finder(location='New York', cuisine='Italian', preferences=['Vegetarian'])"}
+{"id": "multiple_53", "result": "get_cooking_recipe(dish_name='Caesar Salad', serving_size=2)"}
+{"id": "multiple_54", "result": "whole_foods.order(location='uptown', items=['pepperoni pizza', 'chicken Caesar salad'], size='large')"}
+{"id": "multiple_55", "result": "grocery_store.find_by_criteria(location='New York City', criteria=['24 hours'])"}
+{"id": "multiple_56", "result": "hotel_booking.check_availability(hotel_name='Royal Hotel', location='Paris, France', check_in_date='2022-04-05', check_out_date='2022-04-15')"}
+{"id": "multiple_57", "result": "hotel_booking.book(hotel_name='Marriott', location='Los Angeles', check_in='2022-06-01', check_out='2022-06-10', adults=1, children=2)"}
+{"id": "multiple_58", "result": "get_exchange_rate(base_currency='USD', target_currency='CAD')"}
+{"id": "multiple_59", "result": "get_conversion_cost(amount=200, from_currency='pounds', to_currency='dollars')"}
+{"id": "multiple_60", "result": "math.factorial(number=9)"}
+{"id": "multiple_61", "result": "[math.hypot(x=3, y=4), math.hypot(x=6, y=8), math.hypot(x=9, y=12, z=15)]"}
+{"id": "multiple_62", "result": "algebra.quadratic_roots(a=5, b=-7, c=3)"}
+{"id": "multiple_63", "result": "solve_quadratic_equation(a=3, b=2, c=1)"}
+{"id": "multiple_64", "result": "solve_quadratic(a=1, b=2, c=1, root_type='real')"}
+{"id": "multiple_65", "result": "calculate_circumference(radius=20, unit='cm')"}
+{"id": "multiple_66", "result": "geometry.area_circle(radius=15, units='meters')"}
+{"id": "multiple_67", "result": "geometry.calculate_area_circle(radius=10, unit='meters')"}
+{"id": "multiple_68", "result": "calculate_area(base=18, height=24, unit='m')"}
+{"id": "multiple_69", "result": "calculate_triangle_area(base=8, height=6)"}
+{"id": "multiple_70", "result": "geometry.circumference(radius=20, units='m')"}
+{"id": "multiple_71", "result": "calculate_derivative(function='18x - 4', x_value=2)"}
+{"id": "multiple_72", "result": "integrate(function='2x**2 + 3x - 1', start_x=-1, end_x=3, method='simpson')"}
+{"id": "multiple_73", "result": "calculus.derivative(function='4y**3 - 3y**2 + 2y - 1', value=3, function_variable='y')"}
+{"id": "multiple_74", "result": "[get_prime_factors(number=7890, formatted=False), get_prime_factors(number=4567, formatted=False)]"}
+{"id": "multiple_75", "result": "number_analysis.prime_factors(number=150)"}
+{"id": "multiple_76", "result": "math.gcd(num1=81, num2=27)"}
+{"id": "multiple_77", "result": "[math.hcf(number1=72, number2=96), math.hcf()]"}
+{"id": "multiple_78", "result": "number_theory.gcd(number1=81, number2=63)"}
+{"id": "multiple_79", "result": "prime_factorize(number=7890, return_type='dictionary')"}
+{"id": "multiple_80", "result": "math.gcd(num1=60, num2=96)"}
+{"id": "multiple_81", "result": "calculate_final_velocity(height=25, initial_velocity=0, gravity=9.81)"}
+{"id": "multiple_82", "result": "calculate_velocity(distance=150, duration=6, unit='km/h')"}
+{"id": "multiple_83", "result": "final_velocity(initial_velocity=20, acceleration=4, time=12)"}
+{"id": "multiple_84", "result": "calculate_displacement(initial_velocity=25, time=8, acceleration=0)"}
+{"id": "multiple_85", "result": "calculate_final_speed(initial_speed=5, time=7, gravity=-9.81)"}
+{"id": "multiple_86", "result": "kinematics.final_velocity_from_distance(acceleration=10, distance=200)"}
+{"id": "multiple_87", "result": "calculate_final_velocity(initial_velocity=20, acceleration=4, time=15)"}
+{"id": "multiple_88", "result": "calculate_final_speed(initial_velocity=5, height=20, gravity=9.8)"}
+{"id": "multiple_89", "result": "get_directions(start_location='Golden Gate Bridge in San Francisco', end_location='San Francisco', route_type='fastest')"}
+{"id": "multiple_90", "result": "travel_itinerary_generator(destination='Rome', days=12, daily_budget=180, exploration_type='culture')"}
+{"id": "multiple_91", "result": "vegan_restaurant.find_nearby(location='Seattle, WA', operating_hours=22)"}
+{"id": "multiple_92", "result": "get_shortest_driving_distance(origin='Miami', destination='New York City', unit='miles')"}
+{"id": "multiple_93", "result": "route.estimate_time(start_location='Philadelphia', end_location='Miami', stops=['Washington D.C.'])"}
+{"id": "multiple_94", "result": "calculate_electric_field(charge=3, distance=4)"}
+{"id": "multiple_95", "result": "calculate_magnetic_field(current=15, radius=1)"}
+{"id": "multiple_96", "result": "electromagnetic_force(charge1=5, charge2=10, distance=2, medium_permittivity=5e-12)"}
+{"id": "multiple_97", "result": "calculate_resonant_frequency(inductance=0.007, capacitance=2e-07, round_off=4)"}
+{"id": "multiple_98", "result": "calculate_electric_field_strength(charge=2, distance=1, medium='air')"}
+{"id": "multiple_99", "result": "thermo.calculate_energy(mass=500, phase_transition='condensation', substance='water')"}
+{"id": "multiple_100", "result": "get_boiling_melting_points(substance='iron', sea_level=0)"}
+{"id": "multiple_101", "result": "calculate_density(mass=15, volume=3)"}
+{"id": "multiple_102", "result": "calc_absolute_pressure(gauge_pressure=2.5, atm_pressure=0.85)"}
+{"id": "multiple_103", "result": "entropy_change.calculate(substance='A', mass=2, initial_temperature=10, final_temperature=50, pressure=1)"}
+{"id": "multiple_104", "result": "calculate_entropy_change(initial_temp=300, final_temp=350, heat_capacity=4.18, isothermal=False)"}
+{"id": "multiple_105", "result": "calc_heat_capacity(temp=300, volume=1.5, gas='air')"}
+{"id": "multiple_106", "result": "fetch_DNA_sequence(DNA_id='XYZ123', upstream=500)"}
+{"id": "multiple_107", "result": "get_protein_sequence(gene='BRCA2', species='Pan troglodytes')"}
+{"id": "multiple_108", "result": "biology.get_cell_info(cell_type='muscle', detailed=False)"}
+{"id": "multiple_109", "result": "cellbio.get_proteins(cell_compartment='cytoplasm', include_description=True)"}
+{"id": "multiple_110", "result": "cell_biology.function_lookup(molecule='DNA', organelle='nucleus', specific_function=True)"}
+{"id": "multiple_111", "result": "calculate_molecular_weight(compound='C12H22O11', to_unit='grams/mole')"}
+{"id": "multiple_112", "result": "mutation_type.find(snp_id='rs7891011', species='Canis lupus familiaris')"}
+{"id": "multiple_113", "result": "diabetes_prediction(weight=220, height=68, activity_level='extra active')"}
+{"id": "multiple_114", "result": "analyze_dna_sequence(sequence='AGCTTAGGCTA', reference_sequence='AGCTTAGCTA', mutation_type='substitution')"}
+{"id": "multiple_115", "result": "genetics.calculate_similarity(species1='human', species2='gorilla', format='fraction')"}
+{"id": "multiple_116", "result": "calculate_genotype_frequency(allele_frequency=0.7, genotype='aa')"}
+{"id": "multiple_117", "result": "calculate_density(country='China', year='2010', population=1341000000.0, land_area=9597000.0)"}
+{"id": "multiple_118", "result": "ecology_data.precipitation_stats(location='Amazon rainforest', time_frame='five_years')"}
+{"id": "multiple_119", "result": "identify_bird(color='green', habitat='tropical rainforest', size='large')"}
+{"id": "multiple_120", "result": "[forest_growth_forecast(location='Amazon Rainforest', years=10, include_human_impact=False), forest_growth_forecast(location='Boreal Forests of Canada', years=20, include_human_impact=False)]"}
+{"id": "multiple_121", "result": "ecology.get_turtle_population(location='Galapagos Islands', year=2020, species=True)"}
+{"id": "multiple_122", "result": "[calculate_vehicle_emission(vehicle_type='gas', miles_driven=15000), calculate_vehicle_emission(vehicle_type='diesel', miles_driven=15000, emission_factor=2.7), calculate_vehicle_emission(vehicle_type='EV', miles_driven=15000, emission_factor=0)]"}
+{"id": "multiple_123", "result": "generate_DNA_sequence(length=500, preferences=['G'])"}
+{"id": "multiple_124", "result": "[population_projections(country='India', years=20), population_projections(country='Japan', years=10)]"}
+{"id": "multiple_125", "result": "[elephant_population_estimate(current_population=500, growth_rate=0.025, years=10), elephant_population_estimate(current_population=500, growth_rate=0.015, years=10), elephant_population_estimate(current_population=500, growth_rate=0.02, years=10)]"}
+{"id": "multiple_126", "result": "prediction.evolution(species='African Elephant', years=5000, model='Lamarck')"}
+{"id": "multiple_127", "result": "restaurant.find_nearby(location='Chicago, IL', dietary_preference=['Vegan', 'Gluten-free', 'Dairy-free'])"}
+{"id": "multiple_128", "result": "average_temperature(location='Los Angeles', days=7, temp_unit='Celsius')"}
+{"id": "multiple_129", "result": "create_histogram(data=[32, 35, 31, 34, 38, 39, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46], bins=5)"}
+{"id": "multiple_130", "result": "find_restaurants(location='Los Angeles', food_type='Italian', number=4, dietary_requirements=['vegan', 'gluten-free'])"}
+{"id": "multiple_131", "result": "[map_routing.fastest_route(start_location='San Jose', end_location='San Francisco', avoid_tolls=True), map_routing.fastest_route(start_location='San Francisco', end_location='Palo Alto', avoid_tolls=True), map_routing.fastest_route(start_location='Palo Alto', end_location='San Jose', avoid_tolls=True), map_routing.fastest_route(start_location='San Jose', end_location='San Francisco', avoid_tolls=True)]"}
+{"id": "multiple_132", "result": "calculate_average(numbers=[87, 65, 43, 21])"}
+{"id": "multiple_133", "result": "calculate_distance(coord1=[37.9715, 23.7257], coord2=[29.9792, 31.1342], unit='kilometers')"}
+{"id": "multiple_134", "result": "calculate_bmi(weight=90, height=185, unit='metric')"}
+{"id": "multiple_135", "result": "geo_distance.calculate(start_location='Miami', end_location='New York', units='kilometers')"}
+{"id": "multiple_136", "result": "city_distance.find_shortest(start_city='New York', end_city='Los Angeles', transportation='bus', allow_transfer=True)"}
+{"id": "multiple_137", "result": "array_sort(list=[56, 78, 90, 12, 34], order='descending')"}
+{"id": "multiple_138", "result": "calculate_BMI(weight_kg=75, height_m=1.7)"}
+{"id": "multiple_139", "result": "employee.fetch_data(company_name='Tech Solutions', employee_id=67890, data_field=['Personal Info', 'Job History', 'Payroll', 'Attendance'])"}
+{"id": "multiple_140", "result": "imdb.find_movies_by_actor(actor_name='Leonardo DiCaprio', year=2010, category='Drama')"}
+{"id": "multiple_141", "result": "get_theater_movie_releases(location='Los Angeles', timeframe=14, format='2D')"}
+{"id": "multiple_142", "result": "update_user_info(user_id=67890, update_info={'name': ['John'], 'email': ['example@.com']}, database='CustomerInfo')"}
+{"id": "multiple_143", "result": "calc_area_triangle(base=20, height=10)"}
+{"id": "multiple_144", "result": "math.factorial(number=2)"}
+{"id": "multiple_145", "result": "[calculate_clock_angle(hours=11, minutes=50, round_to=2), calculate_clock_angle(hours=8, minutes=20, round_to=2), calculate_clock_angle(hours=3, minutes=15, round_to=2)]"}
+{"id": "multiple_146", "result": "plot_sine_wave(start_range=0, end_range=20, frequency=10, amplitude=3, phase_shift=2)"}
+{"id": "multiple_147", "result": "light_travel_time(distance_in_light_years=5.88, speed_of_light=299792458)"}
+{"id": "multiple_148", "result": "calculate_speed(distance=10000, time=600, to_unit='km/h')"}
+{"id": "multiple_149", "result": "calculate_distance(body1='Mars', body2='Jupiter', unit='miles')"}
+{"id": "multiple_150", "result": "mathematics.calculate_area_under_curve(polynomial=[1, 0, -1], limits=[0, 3])"}
+{"id": "multiple_151", "result": "geometry.area_triangle(base=35, height=40, unit='square inches')"}
+{"id": "multiple_152", "result": "math.power(base=2, exponent=3)"}
+{"id": "multiple_153", "result": "train_random_forest_classifier(dataset='dataset2', max_depth=20, n_estimators=200)"}
+{"id": "multiple_154", "result": "calculate_bmi(weight=90, height=185, system='metric')"}
+{"id": "multiple_155", "result": "run_linear_regression(predictors=['Age', 'Income', 'Education'], target='Spending Score', standardize=True)"}
+{"id": "multiple_156", "result": "random_forest.train(n_estimators=400, max_depth=40, data='data_random_forest')"}
+{"id": "multiple_157", "result": "predict_house_price(bedrooms=3, bathrooms=2, area=1800, location='Miami')"}
+{"id": "multiple_158", "result": "[random.normalvariate(mu=5, sigma=2), random.normalvariate(mu=10, sigma=3)]"}
+{"id": "multiple_159", "result": "[probability.dice_roll(desired_number=7, number_of_rolls=2, die_sides=8), probability.dice_roll(desired_number=7, number_of_rolls=2, die_sides=8)]"}
+{"id": "multiple_160", "result": "prob_dist.binomial(trials=100, successes=30, p=0.3)"}
+{"id": "multiple_161", "result": "[calculate_binomial_probability(number_of_trials=20, number_of_successes=15, probability_of_success=0.6), calculate_binomial_probability(number_of_trials=10, number_of_successes=7, probability_of_success=0.6)]"}
+{"id": "multiple_162", "result": "probability_of_event(success_outcomes=26, total_outcomes=52, format_as_ratio=True)"}
+{"id": "multiple_163", "result": "[calc_binomial_prob(num_trials=15, num_success=6, prob_success=0.5), calc_binomial_prob(num_trials=10, num_success=6, prob_success=0.6)]"}
+{"id": "multiple_164", "result": "chi_squared_test(table=[30, 70, 50, 50], alpha=0.05)"}
+{"id": "multiple_165", "result": "t_test(dataset_A=[12, 15, 18, 20, 22, 25, 28, 30, 32, 35], dataset_B=[14, 17, 19, 21, 23, 26, 29, 31, 33, 36], alpha=0.01)"}
+{"id": "multiple_166", "result": "[predict_house_price(area=2000, rooms=2, year=1995, location='Chicago'), predict_house_price(area=2500, rooms=3, year=2000, location='New York'), predict_house_price(area=3000, rooms=3, year=2005, location='Los Angeles')]"}
+{"id": "multiple_167", "result": "linear_regression.get_r_squared(dataset_path='/user/home/datasets/finance.csv', independent_variables=['income', 'age', 'credit_score'], dependent_variable='education')"}
+{"id": "multiple_168", "result": "[finance.calculate_quarterly_dividend_per_share(total_payout=6000000, outstanding_shares=2000000), finance.calculate_quarterly_dividend_per_share(total_payout=6000000, outstanding_shares=2500000)]"}
+{"id": "multiple_169", "result": "calculate_discounted_cash_flow(coupon_payment=60, period=7, discount_rate=0.04, face_value=1000)"}
+{"id": "multiple_170", "result": "[calculate_compound_interest(principal=5000, rate=0.025, time=5, n=4), calculate_compound_interest()]"}
+{"id": "multiple_171", "result": "calculate_return_on_equity(net_income=2000000, shareholder_equity=10000000, dividends_paid=0)"}
+{"id": "multiple_172", "result": "finance.predict_future_value(present_value=7000, annual_interest_rate=0.04, compounding_periods_per_year=1, time_years=15)"}
+{"id": "multiple_173", "result": "investment.predictProfit(investment_amount=8000, annual_return=0.05, years=7)"}
+{"id": "multiple_174", "result": "[calculate_return_on_investment(purchase_price=250, sale_price=300, dividend=40), calculate_return_on_investment(purchase_price=150, sale_price=180, dividend=20)]"}
+{"id": "multiple_175", "result": "[portfolio_future_value(stock='AMZN', invested_amount=10000, expected_annual_return=0.08, years=10), portfolio_future_value(stock='AAPL', invested_amount=5000, expected_annual_return=0.07, years=5)]"}
+{"id": "multiple_176", "result": "calculate_cagr(initial_value=8000, final_value=12000, period_in_years=3)"}
+{"id": "multiple_177", "result": "get_metal_price(metal='palladium', measure='ounce')"}
+{"id": "multiple_178", "result": "get_stock_price(company_name='Apple', date='2022-02-01', exchange='NASDAQ')"}
+{"id": "multiple_179", "result": "get_stock_price(company='AAPL', days=10, exchange='NASDAQ')"}
+{"id": "multiple_180", "result": "stock_price(company='Apple', days=30, data_type='Low')"}
+{"id": "multiple_181", "result": "get_stock_prices(companies=['Tesla'], duration='1 month')"}
+{"id": "multiple_182", "result": "finance.calculate_future_value(initial_investment=3000, rate_of_return=0.06, years=10, contribution=200)"}
+{"id": "multiple_183", "result": "[math.hypot(x=20, y=25), math.hypot(x=5, y=7), math.hypot(x=10, y=15), math.hypot(x=10, y=15)]"}
+{"id": "multiple_184", "result": "algebra.quadratic_roots(a=5, b=-4, c=1)"}
+{"id": "multiple_185", "result": "[estimate_population(species='African Elephants', country='Kenya', year=2023), estimate_population(species='Bengal Tigers', country='India', year=2023), estimate_population(species='Bengal Tigers', country='India', year=2021), estimate_population(species='African Elephants', country='Kenya', year=2021), estimate_population(species='Bengal Tigers', country='India', year=2021)]"}
+{"id": "multiple_186", "result": "calculate_emission_savings(energy_type='wind', usage_duration=8, region='Midwest')"}
+{"id": "multiple_187", "result": "get_air_quality(location='New York City', detail=True, historical='2023-05-03')"}
+{"id": "multiple_188", "result": "get_traffic_info(start_location='San Francisco', end_location='New York', mode='transit')"}
+{"id": "multiple_189", "result": "parks.find_nearby(location='Chicago, USA', amenities=['Tennis Court', 'Playground'])"}
+{"id": "multiple_190", "result": "calculate_shortest_distance(start_location='Los Angeles', end_location='Miami', route_preference='Scenic')"}
+{"id": "multiple_191", "result": "public_library.find_nearby(location='Chicago, IL', facilities=['Cafe', 'Reading Room'])"}
+{"id": "multiple_192", "result": "get_news(topic='Climate Change', quantity=5, region='Europe')"}
+{"id": "multiple_193", "result": "send_email(to='jane.doe@example.com', subject='Meeting Reminder', body='Dear Jane, This is a reminder for our meeting scheduled for tomorrow at 10 AM. Best, Alex', cc='assistant@example.com', bcc='hr@example.com')"}
+{"id": "multiple_194", "result": "event_finder.find_upcoming(location='Boston, MA', genre='classical music', days_ahead=7)"}
+{"id": "multiple_195", "result": "movie_details.brief(title='Inception', extra_info=False)"}
+{"id": "multiple_196", "result": "get_lawsuit_details(case_number='67890', court_location='Los Angeles Superior Court', with_verdict=False)"}
+{"id": "multiple_197", "result": "lawsuit_info(case_number='67890XYZ', year=2019, location='California')"}
+{"id": "multiple_198", "result": "lawsuit_search(entity='Facebook', county='San Mateo', state='California')"}
+{"id": "multiple_199", "result": "get_current_weather(location='Tokyo', include_temperature=True, include_humidity=True)"}
