@@ -27,9 +27,6 @@ from bfcl.utils import *
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-# A dictionary to store the evaluation scores.
-# Key is model name, value is a dictionary with keys as test category and values as a dictionary with accuracy and total count
-LEADERBOARD_TABLE = {}
 
 
 def multi_turn_runner(
@@ -343,6 +340,8 @@ def relevance_file_runner(handler, model_result, prompt, model_name, test_catego
 def ast_file_runner(
     handler, model_result, prompt, possible_answer, language, test_category, model_name
 ):
+    print(prompt[0])
+    print('-------------------')
     assert (
         len(model_result) == len(prompt) == len(possible_answer)
     ), f"The length of the model result ({len(model_result)}) does not match the length of the prompt ({len(prompt)}) or possible answer ({len(possible_answer)}). Please check the input files for completeness."
@@ -486,18 +485,14 @@ def runner(model_names, test_categories, api_sanity_check):
             print(f"🔍 Running test: {test_category}")
 
             model_result = load_file(model_result_json)
-            # record_cost_latency(LEADERBOARD_TABLE, model_name, model_result)
 
-            # Find the corresponding test file
             prompt_file = find_file_with_suffix(PROMPT_PATH, test_category)
             prompt = load_file(prompt_file)
+
 
             if is_relevance_or_irrelevance(test_category):
                 accuracy, total_count = relevance_file_runner(
                     handler, model_result, prompt, model_name, test_category
-                )
-                record_result(
-                    LEADERBOARD_TABLE, model_name, test_category, accuracy, total_count
                 )
                 print(f"✅ Test completed: {test_category}. 🎯 Accuracy: {accuracy}")
                 continue
@@ -543,9 +538,6 @@ def runner(model_names, test_categories, api_sanity_check):
                 accuracy, total_count = executable_file_runner(
                     handler, model_result, prompt, model_name, test_category
                 )
-                record_result(
-                    LEADERBOARD_TABLE, model_name, test_category, accuracy, total_count
-                )
                 print(f"✅ Test completed: {test_category}. 🎯 Accuracy: {accuracy}")
 
                 continue
@@ -556,6 +548,7 @@ def runner(model_names, test_categories, api_sanity_check):
             )
             possible_answer = load_file(possible_answer_file)
 
+
             if is_multi_turn(test_category):
                 accuracy, total_count = multi_turn_runner(
                     handler,
@@ -565,13 +558,10 @@ def runner(model_names, test_categories, api_sanity_check):
                     model_name,
                     test_category,
                 )
-                record_result(
-                    LEADERBOARD_TABLE, model_name, test_category, accuracy, total_count
-                )
                 print(f"✅ Test completed: {test_category}. 🎯 Accuracy: {accuracy}")
             # Single turn test
             else:
-                print(RESULT_PATH)
+                print(prompt[5])
                 accuracy, total_count = ast_file_runner(
                     handler,
                     model_result,
@@ -659,6 +649,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    load_dotenv(dotenv_path=DOTENV_PATH, verbose=True, override=True)  # Load the .env file
+    # load_dotenv(dotenv_path=DOTENV_PATH, verbose=True, override=True)  # Load the .env file
     
     main(args.model, args.test_category, args.api_sanity_check)
