@@ -1,0 +1,10 @@
+{
+    "toolalpaca": {
+        "file_name": "toolalpaca.json",
+        "formatting": "sharegpt",
+        "columns": {
+            "messages": "conversations",
+            "tools": "tools"
+        }
+    }
+}
