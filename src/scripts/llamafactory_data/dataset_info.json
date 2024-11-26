@@ -1,0 +1,19 @@
+{
+    "toolalpaca": {
+        "file_name": "toolalpaca.json",
+        "formatting": "sharegpt",
+        "columns": {
+            "messages": "conversations",
+            "tools": "tools"
+        }
+    },
+    "taskbench": {
+        "file_name": "taskbench.json",
+        "formatting": "sharegpt",
+        "columns": {
+            "messages": "conversations",
+            "system": "system",
+            "tools": "tools"
+        }
+    }
+}
