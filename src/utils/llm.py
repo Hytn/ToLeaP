@@ -19,14 +19,15 @@ conf = Config()
 class LLM:
     def __init__(
         self,
-        model: str = "/hy-tmp/3.1-8B", # 这个是vllm的model path，和huggingface保持统一
-        gpu_memory_utilization: float = 0.9, # 0-1，代表用多少gpu。越高占显存越多但batch处理会加速
-        dtype: str = None, # 建议不设，用模型config自己的
-        tensor_parallel_size: int = 1, # 用多少张gpu
-        use_api_model: bool = False, # 是否调用本地api model
-        use_sharegpt_format: bool = False, # 是否使用sharegpt格式
-        max_past_message_include: int = -1, # 历史记录看多少，-1代表全部
-        max_output_tokens: int = 1024, # 输出最大token数，-1代表不限制
+        model: str = "/hy-tmp/3.1-8B", # model_name_or_path
+        gpu_memory_utilization: float = 0.9, 
+        dtype: str = None, 
+        tensor_parallel_size: int = 4, # gpu_num
+        use_api_model: bool = False, # whether call api model
+        use_sharegpt_format: bool = False, # whether use sharegpt mode
+        max_past_message_include: int = -1, # -1 means all
+        max_output_tokens: int = -1, # Maximum output tokens, -1 means no limit
+        max_model_len: int = 4096,
     ):
         # env initialization
         self.port = conf.port
@@ -34,6 +35,7 @@ class LLM:
         self.api_key = conf.api_key
         self.hf_raw = conf.hf_raw
         self.hf_pipeline = conf.hf_pipeline
+        self.use_hf = self.hf_raw or self.hf_pipeline
 
         # model initialization
         self.model_path_or_name = model
@@ -45,6 +47,7 @@ class LLM:
         self.use_api_model = use_api_model
         self.use_sharegpt_format = use_sharegpt_format
         self.max_output_tokens = max_output_tokens
+        self.max_model_len = max_model_len
 
         # load model
         if self.hf_raw:
@@ -73,7 +76,12 @@ class LLM:
     @contextmanager
     def start_server(self):
         """Context manager for starting and stopping the server"""
-        cmd = ["vllm", "serve", self.model_path_or_name, "--gpu-memory-utilization", str(self.gpu_memory_utilization)]
+        cmd = [
+            "vllm", 
+            "serve", self.model_path_or_name, 
+            "--gpu-memory-utilization", str(self.gpu_memory_utilization),
+            "--max-model-len", str(self.max_model_len),
+        ]
         
         if self.dtype is not None:
             cmd.extend(["--dtype", self.dtype])
@@ -91,7 +99,10 @@ class LLM:
             cmd.extend(["--tensor-parallel-size", str(self.tensor_parallel_size)])
         
         # Start the server as a subprocess
-        with open("serve.log", "w") as log_file:
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        log_filename = f"serve-log/{self.model_path_or_name}/serve_{timestamp}.log"
+        os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+        with open(log_filename, "w") as log_file:
             server_process = subprocess.Popen(
                 cmd,
                 stdout=log_file,
@@ -184,21 +195,22 @@ class LLM:
 
     # single inference
     def _single_inference(self, messages: List[Dict], temperature: float = 0):
-        if not self.use_hf:
+        if self.use_hf:
+            if self.hf_pipeline:
+                outputs = self.pipeline(messages)
+                return outputs[0]["generated_text"][-1]
+            elif self.hf_raw: # Current
+                inputs = self.tokenizer(messages, return_tensors="pt").to(self.model.device)
+                outputs = self.model.generate(**inputs, max_length=self.max_output_tokens)
+                return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        else:
             chat_output = self.client.chat.completions.create(
                 model=self.model_path_or_name,
                 messages=messages,
                 temperature=temperature,
             )
             return chat_output.choices[0].message.content
-        elif self.hf_pipeline:
-            outputs = self.pipeline(messages)
-            return outputs[0]["generated_text"][-1]
-        else:
-            inputs = self.tokenizer(messages, return_tensors="pt").to(self.model.device)
-            outputs = self.model.generate(**inputs, max_length=self.max_output_tokens)
-            return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
+                 
     # batch inference
     def _batch_inference(self, messages_batch: List[List[Dict]], max_concurrent_calls: int = 2, temperature: float = 0) -> List[Dict]:
         """Run inference for a batch of messages with concurrent processing, preserving order."""
