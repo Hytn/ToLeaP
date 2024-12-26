@@ -11,89 +11,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 utils_dir = os.path.join(current_dir, '..')
 sys.path.append(utils_dir)
 
-from utils.sharegpt_inference import LLM
-
-class SealToolsLLM(LLM):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create_messages(self, conversation_data: Dict) -> List[Dict]:
-        print("[DEBUG] - _create_messages checkpoint 1...")
-        messages = []
-        conversations = conversation_data["conversations"][:-1]
-        for msg in conversations:
-            if msg["from"] == "human":
-                role = "user"
-            elif msg["from"] == "gpt":
-                role = "assistant"
-            messages.append({"role": role, "content": msg["value"]})
-        return messages
-
-    def _messages_to_prompt(self, messages: List[Dict]) -> str:
-        prompt = ""
-        for m in messages:
-            role = m["role"]
-            content = m["content"]
-            if role == "user":
-                prompt += f"User: {content}\n"
-            elif role == "assistant":
-                prompt += f"Assistant: {content}\n"
-        prompt += "Assistant:" 
-        return prompt
-
-    def _batch_inference(self, messages_batch: List[List[Dict]], max_concurrent_calls: int = 2, temperature: float = 0) -> List[str]:
-        import time
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        from tqdm import tqdm
-
-        print("[DEBUG] Using modified _batch_inference...")
-
-        responses = [None] * len(messages_batch)
-
-        if not self.use_hf:
-            print("[DEBUG] - Using openai style inference ...")
-
-            def process_single_message(index, messages):
-                try:
-                    chat_output = self.client.chat.completions.create(
-                        model=self.model_path_or_name,
-                        messages=messages,
-                        temperature=temperature,
-                    )
-                    return index, chat_output.choices[0].message.content
-                except Exception as e:
-                    return index, None
-
-            with ThreadPoolExecutor(max_workers=max_concurrent_calls) as executor:
-                futures = {
-                    executor.submit(process_single_message, idx, messages): idx
-                    for idx, messages in enumerate(messages_batch)
-                }
-                for future in tqdm(as_completed(futures), total=len(messages_batch), desc="Processing concurrent calls"):
-                    index, result = future.result()
-                    responses[index] = result
-
-        else:
-            print("[DEBUG] - Using HF pipeline inference ...")
-
-            def process_single_prompt(index, msgs):
-                prompt_text = self._messages_to_prompt(msgs)
-                outputs = self.pipeline(prompt_text, max_length=1024, temperature=temperature)
-                gen_text = outputs[0]["generated_text"]
-                if gen_text.startswith(prompt_text):
-                    gen_text = gen_text[len(prompt_text):]
-                return index, gen_text
-
-            with ThreadPoolExecutor(max_workers=max_concurrent_calls) as executor:
-                futures = {
-                    executor.submit(process_single_prompt, idx, messages): idx
-                    for idx, messages in enumerate(messages_batch)
-                }
-                for future in tqdm(as_completed(futures), total=len(messages_batch), desc="Processing concurrent calls"):
-                    index, result = future.result()
-                    responses[index] = result
-
-        return [r for r in responses]
+from utils.llm import LLM
 
 @click.command()
 @click.option("--model", type=str, default="meta-llama/Llama-2-7b-chat-hf")
@@ -122,37 +40,50 @@ def main(
     with open(data_path, "r", encoding='utf-8') as f:
         eval_data = json.load(f)
 
-    labels = []
-    for d in eval_data:
-        assistant_responses = [c["value"] for c in d["conversations"] if c["from"] == "gpt"]
-        label_str = "\n".join(assistant_responses)
-        labels.append(label_str)
-
-    print(labels[0] if labels else "No labels found")
+    user_prompt = []
+    for entry in eval_data:
+        conversations = entry.get("conversations", [])
+        for msg in conversations:
+            if msg["from"] == "human":
+                role = "user"
+            else: 
+                pass
+            user_prompt.append({"role":role, "content":msg["value"]})
 
     print("[DEBUG] - main checkpoint 2...")
     if not is_api:
-        llm = SealToolsLLM(
+        llm = LLM(
             model=model, 
             tensor_parallel_size=tensor_parallel_size, 
             use_sharegpt_format=True,
-            max_model_len=max_model_len,
-            gpu_memory_utilization=gpu_memory_utilization,
         )
     else:
-        llm = SealToolsLLM(model=model)
+        llm = LLM(model=model)
 
     print("[DEBUG] - main checkpoint 3...")
     # Run inference
     data_filename = os.path.splitext(os.path.basename(data_path))[0]
-    output_path = f"benchmark_results/{model.split('/')[-1]}_sealtools_{data_filename}_results.json"
+    model_split = model.split('/')[-1]
+    model_real_name = None
+    if model_split == "bb46c15ee4bb56c5b63245ef50fd7637234d6f75":
+        model_real_name = "Qwen2.5-7B-Instruct"
+    elif model_split == "a2cb7a712bb6e5e736ca7f8cd98167f81a0b5bd8":
+        model_real_name = "Llama-2-13b-chat-hf"
+    elif model_split == "f5db02db724555f92da89c216ac04704f23d4590":
+        model_real_name = "Llama-2-7b-chat-hf"
+    elif model_split == "f66993d6c40a644a7d7885d4c029943861e06113":
+        model_real_name = "ToolLLaMA-2-7b-v2"
+    else:
+        model_real_name = model_split
+    output_path = f"benchmark_results/{model_real_name}_sealtools_{data_filename}_results.json"
 
     def run_inference():
         print("[DEBUG] - run_inference checkpoint 1...")
         if os.path.exists(output_path):
             results = json.load(open(output_path, "r"))
         else:
-            results = llm.batch_generate(eval_data, max_concurrent_calls=batch_size)
+            print("[DEBUG] - run_inference checkpoint 3...")
+            results = llm.single_generate(user_prompt)
             json.dump(results, open(output_path, "w"), indent=4)
         print("[DEBUG] - run_inference checkpoint 2...")
         return results
