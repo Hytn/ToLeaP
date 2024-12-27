@@ -12,17 +12,18 @@ utils_dir = os.path.join(current_dir, '..')
 sys.path.append(utils_dir)
 
 from utils.llm import LLM
+from tqdm import tqdm
 
 @click.command()
 @click.option("--model", type=str, default="meta-llama/Llama-2-7b-chat-hf")
 @click.option("--data_path", type=str, default="../data/sft_data/taskbench_data_dailylifeapis.json")
 @click.option("--is_api", type=bool, default=False)
-@click.option("--host", type=str, default="localhost")
+@click.option("--host", type=str, default="0.0.0.0")
 @click.option("--port", type=int, default=13427)
-@click.option("--tensor_parallel_size", type=int, default=1)
-@click.option("--batch_size", type=int, default=20)
-@click.option("--gpu_memory_utilization", type=float, default=0.8)
-@click.option("--max_model_len", type=int, default=65535)
+@click.option("--tensor_parallel_size", type=int, default=4)
+@click.option("--batch_size", type=int, default=8)
+@click.option("--gpu_memory_utilization", type=float, default=0.9)
+@click.option("--max_model_len", type=int, default=4096)
 def main(
     model: str, 
     data_path: str, 
@@ -34,28 +35,17 @@ def main(
     max_model_len: int,
     gpu_memory_utilization: float,
     ):
-
     print("[DEBUG] - main checkpoint 1...")
 
     with open(data_path, "r", encoding='utf-8') as f:
         eval_data = json.load(f)
-
-    user_prompt = []
-    for entry in eval_data:
-        conversations = entry.get("conversations", [])
-        for msg in conversations:
-            if msg["from"] == "human":
-                role = "user"
-            else: 
-                pass
-            user_prompt.append({"role":role, "content":msg["value"]})
 
     print("[DEBUG] - main checkpoint 2...")
     if not is_api:
         llm = LLM(
             model=model, 
             tensor_parallel_size=tensor_parallel_size, 
-            use_sharegpt_format=True,
+            use_sharegpt_format=False,
         )
     else:
         llm = LLM(model=model)
@@ -76,28 +66,25 @@ def main(
     else:
         model_real_name = model_split
     output_path = f"benchmark_results/{model_real_name}_sealtools_{data_filename}_results.json"
-
+                  
     def run_inference():
         print("[DEBUG] - run_inference checkpoint 1...")
         if os.path.exists(output_path):
             results = json.load(open(output_path, "r"))
         else:
             print("[DEBUG] - run_inference checkpoint 3...")
-            results = llm.single_generate(user_prompt)
+            results = []
+            for ed in tqdm(eval_data, desc="Processing", unit="sample"):
+                results.append(llm.single_generate(
+                    ed["conversations"][-1]["value"]
+                ))
             json.dump(results, open(output_path, "w"), indent=4)
         print("[DEBUG] - run_inference checkpoint 2...")
         return results
         
     print("[DEBUG] - main checkpoint 4...")
     if not os.path.exists(output_path):
-        print("[DEBUG] - main branch checkpoint 1...")
-        if not is_api:
-            print("[DEBUG] - main branch checkpoint 2...")
-            with llm.start_server():
-                results = run_inference()
-        else:
-            print("[DEBUG] - main branch checkpoint 3...")
-            results = run_inference()
+        results = run_inference()
     else:
         print("[DEBUG] - main branch checkpoint 4...")
         results = json.load(open(output_path, "r"))
