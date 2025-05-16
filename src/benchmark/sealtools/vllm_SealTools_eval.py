@@ -1,4 +1,3 @@
-# This file comes from fairyshine/Seal-Tools/LLM_Evaluation/src/calculate_pluginscore_detailed.py
 # Copyright 2024 fairyshine/Seal-Tools
 # Modifications Copyright 2024 BodhiAgent
 #
@@ -14,553 +13,413 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json, os, re
+import json
+import os
+import re
 
 def transform_output_format(dataset_name, output_text):
     match dataset_name:
         case "TableEE":
             try:
-                api_text=re.search("\[[^\[\]]*\]",output_text)
-                if api_text == None:
-                    api_text=re.findall("{[^{}]*}",output_text)
-                    structured_output = []
-                    for i in range(len(api_text)):
+                api_match = re.search(r"\[[^\[\]]*\]", output_text)
+                if api_match is None:
+                    all_matches = re.findall(r"\{[^{}]*\}", output_text)
+                    structured = []
+                    for item in all_matches:
                         try:
-                            structured_output.append(json.loads(api_text[i]))
+                            structured.append(json.loads(item))
                         except:
                             pass
                 else:
-                    structured_output = json.loads(api_text.group())
-                if type(structured_output)!=list:
-                    structured_output = [structured_output]
-                pred_text = []
-                for i in range(len(structured_output)):
-                    if type(structured_output[i])==dict:
-                        if '事件类型' in structured_output[i]:
-                            structured_output[i]['event_type'] = structured_output[i]['事件类型']
-                            del structured_output[i]['事件类型']
-                        else:
-                            structured_output[i]['event_type'] = None
-                        pred_text.append(structured_output[i])
+                    structured = json.loads(api_match.group())
+                if not isinstance(structured, list):
+                    structured = [structured]
+                predictions = []
+                for entry in structured:
+                    if isinstance(entry, dict):
+                        # map Chinese key to English
+                        entry['event_type'] = entry.pop('event_type', None)
+                        predictions.append(entry)
+                return predictions
             except:
-                pred_text = -1
-            return pred_text
+                return -1
 
-        case '14lap' | '14res' | '15res' | '16res':   #absa
-            LLM_ans = output_text
-            LLM_ans = re.sub("'", '"', LLM_ans)
-            LLM_ans_splits = re.split('\n\n', LLM_ans)
-            # pattern=re.compile(r'\{(?:"ent":\s?\[(\".*\".*)*(\".*\")].*)(?:\"rel\":\s?\[(\{(?:\"relation\":\s?\".*\".*)'
-            #                    r'(?:\"head\":\s?\".*\".*)(?:\"tail\":\s?\".*\")\}.*)*\{(?:\"relation\":\s?\".*\".*)'
-            #                    r'(?:\"head\":\s?\".*\".*)(?:\"tail\":\s?\".*\".*)\}\].*)\}')
+        case '14lap' | '14res' | '15res' | '16res':   # ABSA
+            text = re.sub("'", '"', output_text)
+            parts = re.split(r'\n\n', text)
             try:
-                # pattern = re.compile(r'\[(\{((\"relation\":(.|\s)*\"(.|\s)*\"(.|\s)*)|(\"head\":(.|\s)*\"(.|\s)*\"(.|\s)*)|(\"tail\":(.|\s)*\"(.|\s)*\"(.|\s)*)){3}\})*\]')
                 pattern = re.compile(r'\[[^\[\]]*\]')
-                predict_ans_all = []
-                for LLM_ans_temp in LLM_ans_splits:
-                    LLM_ans_temp = re.sub("\n", "", LLM_ans_temp)
-                    predict_ans_all_temp = pattern.findall(LLM_ans_temp)
-                    predict_ans_all.extend(predict_ans_all_temp)
+                candidates = []
+                for part in parts:
+                    flat = re.sub(r"\n", "", part)
+                    candidates.extend(pattern.findall(flat))
 
-                for i in range(len(predict_ans_all)):
-                    if predict_ans_all[i] != '[]':
-                        predict_ans_all[i], predict_ans_all[0] = predict_ans_all[0], predict_ans_all[i]
+                # bring first non-empty
+                for i, cand in enumerate(candidates):
+                    if cand != '[]':
+                        candidates[0], candidates[i] = candidates[i], candidates[0]
                         break
-                if len(predict_ans_all)==0:
+                if not candidates:
                     return -1
-                for predict_ans in predict_ans_all:
 
+                for cand in candidates:
                     try:
-                        judge=0
-                        lsts = json.loads(predict_ans)
-                        for lst in lsts:
-                            if lst.get('Sentiment', -1) == -1 or lst.get('Aspect_Term', -1) == -1 or lst.get('Opinion_Term', -1) == -1:
-                                judge=1
-                        if judge:
-                            continue
-                        else:
-                            return lsts
+                        items = json.loads(cand)
+                        # filter invalid
+                        valid = True
+                        for item in items:
+                            if (
+                                item.get('Sentiment', -1) == -1 or
+                                item.get('Aspect_Term', -1) == -1 or
+                                item.get('Opinion_Term', -1) == -1
+                            ):
+                                valid = False
+                                break
+                        if valid:
+                            return items
                     except:
                         continue
                 return -1
-
             except:
                 return -1
 
-        case 'ag_news' | 'MedQA' | 'MRPC' | 'SNLI':  #CLS
-            LLM_ans = output_text
-            LLM_ans = re.sub("'", '"', LLM_ans)
-            LLM_ans_splits = re.split('\n\n', LLM_ans)
+        case 'ag_news' | 'MedQA' | 'MRPC' | 'SNLI':  # Classification
+            text = re.sub("'", '"', output_text)
+            parts = re.split(r'\n\n', text)
             try:
-                # pattern = re.compile(r'(\{\".*\"\})|(\[.*\])')
-                pattern1 = re.compile(r'\{[^\{\}]*\}')
-                predict_ans1_all = []
-                for LLM_ans1_temp in LLM_ans_splits:
-                    LLM_ans1_temp = re.sub("\n", "", LLM_ans1_temp)
-                    predict_ans1_all_temp = pattern1.findall(LLM_ans1_temp)
-                    predict_ans1_all.extend(predict_ans1_all_temp)
+                # try object then list
+                obj_pattern = re.compile(r'\{[^\{\}]*\}')
+                list_pattern = re.compile(r'\[[^\[\]]*\]')
+                objs = []
+                lists = []
+                for part in parts:
+                    flat = re.sub(r"\n", "", part)
+                    objs.extend(obj_pattern.findall(flat))
+                    lists.extend(list_pattern.findall(flat))
 
-                pattern2 = re.compile(r'\[[^\[\]]*\]')
-                predict_ans2_all = []
-                for LLM_ans2_temp in LLM_ans_splits:
-                    LLM_ans2_temp = re.sub("\n", "", LLM_ans2_temp)
-                    predict_ans2_all_temp = pattern2.findall(LLM_ans2_temp)
-                    predict_ans2_all.extend(predict_ans2_all_temp)
-
-                if len(predict_ans1_all):
-                    for predict_ans1 in predict_ans1_all:
-
-                        s_p_ans = predict_ans1
-                        s_p_ans = s_p_ans[1:-1]
-
+                if objs:
+                    for s in objs:
+                        snippet = s[1:-1]
                         try:
-                            return json.loads(s_p_ans)
+                            return json.loads(snippet)
                         except:
                             continue
-
                     return -1
-                elif len(predict_ans2_all):
-                    for predict_ans2 in predict_ans2_all:
-
-                        s_p_ans = predict_ans2
-                        s_p_ans = '\"' + s_p_ans + '\"'
-
+                elif lists:
+                    for s in lists:
                         try:
-                            return json.loads(s_p_ans)
+                            return json.loads(f'"{s}"')
                         except:
                             continue
-
                     return -1
                 else:
                     return -1
             except:
                 return -1
 
-        case 'MIT_MOVIE_Review' | 'MIT_Restaurant_Review' | 'NCBIdisease' | 'ontoNotes5':  #NER
-            LLM_ans = output_text
-            LLM_ans = re.sub("'", '"', LLM_ans)
-            LLM_ans_splits = re.split('\n\n', LLM_ans)
+        case 'MIT_MOVIE_Review' | 'MIT_Restaurant_Review' | 'NCBIdisease' | 'ontoNotes5':  # NER
+            text = re.sub("'", '"', output_text)
+            parts = re.split(r'\n\n', text)
             try:
-                #pattern = re.compile(r'\[(\{((\"text\":(.|\s)*\"(.|\s)*\"(.|\s)*)|(\"type\":(.|\s)*\"(.|\s)*\"(.|\s)*)){2}\})*\]')
-                pattern=re.compile(r'\[[^\[\]]*\]')
-                predict_ans_all = []
-                for LLM_ans_temp in LLM_ans_splits:
-                    LLM_ans_temp = re.sub("\n", "", LLM_ans_temp)
-                    predict_ans_all_temp = pattern.findall(LLM_ans_temp)
-                    predict_ans_all.extend(predict_ans_all_temp)
+                pattern = re.compile(r'\[[^\[\]]*\]')
+                candidates = []
+                for part in parts:
+                    flat = re.sub(r"\n", "", part)
+                    candidates.extend(pattern.findall(flat))
 
-                for i in range(len(predict_ans_all)):
-                    if predict_ans_all[i] != '[]':
-                        predict_ans_all[i], predict_ans_all[0] = predict_ans_all[0], predict_ans_all[i]
+                for i, cand in enumerate(candidates):
+                    if cand != '[]':
+                        candidates[0], candidates[i] = candidates[i], candidates[0]
                         break
-                for predict_ans in predict_ans_all:
 
+                for cand in candidates:
                     try:
-                        lsts = json.loads(predict_ans)
-                        judge=0
-                        for dict_temp in lsts:
-                            if dict_temp.get('text', -1) == -1 or dict_temp.get('type', -1) == -1:
-                                judge=1
-                        if judge:
-                            continue
-                        else:
-                            return lsts
+                        items = json.loads(cand)
+                        valid = True
+                        for entry in items:
+                            if entry.get('text', -1) == -1 or entry.get('type', -1) == -1:
+                                valid = False
+                                break
+                        if valid:
+                            return items
                     except:
                         continue
                 return -1
-
             except:
                 return -1
 
-        case 'scierc' | 'semeval' | 'WebNLG':  #RE
-            LLM_ans = output_text
-            LLM_ans = re.sub("'", '"', LLM_ans)
-            LLM_ans_splits = re.split('\n\n', LLM_ans)
+        case 'scierc' | 'semeval' | 'WebNLG':  # RE
+            text = re.sub("'", '"', output_text)
+            parts = re.split(r'\n\n', text)
             try:
-                #pattern = re.compile(r'\[(\{((\"relation\":(.|\s)*\"(.|\s)*\"(.|\s)*)|(\"head\":(.|\s)*\"(.|\s)*\"(.|\s)*)|(\"tail\":(.|\s)*\"(.|\s)*\"(.|\s)*)){3}\})*\]')
-                pattern=re.compile(r'\[[^\[\]]*\]')
-                predict_ans_all = []
-                for LLM_ans_temp in LLM_ans_splits:
-                    LLM_ans_temp = re.sub("\n", "", LLM_ans_temp)
-                    predict_ans_all_temp = pattern.findall(LLM_ans_temp)
-                    predict_ans_all.extend(predict_ans_all_temp)
-                for i in range(len(predict_ans_all)):
-                    if predict_ans_all[i] != '[]':
-                        predict_ans_all[i], predict_ans_all[0] = predict_ans_all[0], predict_ans_all[i]
+                pattern = re.compile(r'\[[^\[\]]*\]')
+                candidates = []
+                for part in parts:
+                    flat = re.sub(r"\n", "", part)
+                    candidates.extend(pattern.findall(flat))
+
+                for i, cand in enumerate(candidates):
+                    if cand != '[]':
+                        candidates[0], candidates[i] = candidates[i], candidates[0]
                         break
-                for predict_ans in predict_ans_all:
+
+                for cand in candidates:
                     try:
-                        lsts = json.loads(predict_ans)
-                        judge=0
-                        for lst in lsts:
-                            if lst.get('relation', -1) == -1 or lst.get('head', -1) == -1 or lst.get('tail', -1) == -1:
-                                judge=1
-                        if judge:
-                            continue
-                        else:
-                            return lsts
+                        items = json.loads(cand)
+                        valid = True
+                        for entry in items:
+                            if (
+                                entry.get('relation', -1) == -1 or
+                                entry.get('head', -1) == -1 or
+                                entry.get('tail', -1) == -1
+                            ):
+                                valid = False
+                                break
+                        if valid:
+                            return items
                     except:
                         continue
                 return -1
-
             except:
                 return -1
 
-        case 'ace05-evt' | 'casie' | 'PHEE':  #EE
-            LLM_ans = output_text
-            LLM_ans = re.sub("'", '"', LLM_ans)
-            LLM_ans_splits = re.split('\n\n', LLM_ans)
+        case 'ace05-evt' | 'casie' | 'PHEE':  # EE
+            text = re.sub("'", '"', output_text)
+            parts = re.split(r'\n\n', text)
             try:
-                # pattern = re.compile(r'\[(\{((\"event_type\":.*\".*\".*)|(\"trigger\":.*\".*\".*)|('
-                #                      r'\"args\":.*\[(\{((\"role\":.*\".*\".*)|(\"text\":.*\".*\".*)){2}\})*\].*)){3}\})*\]')
-
                 pattern = re.compile(r'\[\{.*\}\]')
-                predict_ans_all = []
-                for LLM_ans_temp in LLM_ans_splits:
-                    LLM_ans_temp = re.sub("\n", "", LLM_ans_temp)
-                    predict_ans_all_temp = pattern.findall(LLM_ans_temp)
-                    predict_ans_all.extend(predict_ans_all_temp)
+                candidates = []
+                for part in parts:
+                    flat = re.sub(r"\n", "", part)
+                    candidates.extend(pattern.findall(flat))
 
-                for i in range(len(predict_ans_all)):
-                    if predict_ans_all[i] != '[]':
-                        predict_ans_all[i], predict_ans_all[0] = predict_ans_all[0], predict_ans_all[i]
+                for i, cand in enumerate(candidates):
+                    if cand != '[]':
+                        candidates[0], candidates[i] = candidates[i], candidates[0]
 
-                if len(predict_ans_all) == 0:
-                    pattern = re.compile(r'\[[^\[\]]*\]')
-                    predict_ans_all = pattern.findall(LLM_ans)
+                if not candidates:
+                    candidates = re.compile(r'\[[^\[\]]*\]').findall(text)
 
-                for predict_ans in predict_ans_all:
-
+                for cand in candidates:
                     try:
-                        dict_temps = json.loads(predict_ans)
-
-                        judge = 0
-                        for dict_temp in dict_temps:
-
-                            if dict_temp.get('event_type', -1) != -1 and dict_temp.get('trigger',-1) != -1 and dict_temp.get('args',-1) != -1:
-                                args = dict_temp['args']
-
-                                for arg in args:
-                                    if arg.get('role', -1) == -1 or arg.get('text', -1) == -1:
-                                        judge = 1
-
-                            else:
-                                judge = 1
-                        if judge:
-                            continue
-                        else:
-                            return dict_temps
+                        items = json.loads(cand)
+                        valid = True
+                        for entry in items:
+                            if (
+                                entry.get('event_type', -1) == -1 or
+                                entry.get('trigger', -1) == -1 or
+                                entry.get('args', -1) == -1
+                            ):
+                                valid = False
+                                break
+                            for arg in entry['args']:
+                                if arg.get('role', -1) == -1 or arg.get('text', -1) == -1:
+                                    valid = False
+                                    break
+                            if not valid:
+                                break
+                        if valid:
+                            return items
                     except:
-
                         continue
                 return -1
-
             except:
                 return -1
 
         case 'api_we_instructed':
-            #example:"answer": {"api": "FindMovies", "slots": {"genre": "Family", "show_type": "3D", "location": "San Jose"}}
             try:
-                pattern = re.compile("{.*}", re.DOTALL)
-                api_text = re.search(pattern, output_text)
-                if api_text:
-                    api_output = json.loads(api_text.group(0))
-                    return api_output
+                pattern = re.compile(r"\{.*\}", re.DOTALL)
+                match_obj = re.search(pattern, output_text)
+                if match_obj:
+                    return json.loads(match_obj.group(0))
                 else:
                     return -1
             except:
-                return -1     
-
-        # case 'ToolLearning':
-             
-        #     def match_square_bracket(text, pos_s):
-        #         counter = -1
-        #         for i in range(pos_s+1,len(text)):
-        #             if text[i] == '[':
-        #                 counter -= 1
-        #             elif text[i] == ']':
-        #                 counter += 1
-        #             if counter == 0:
-        #                 return i
-        #         return -1
-            
-            # format_index = output_text.find("[{\"api\":")  
-            # if format_index == -1:
-            #     return -1
-            # else:
-            #     output_text = output_text[format_index:]
-        case 'ToolLearning':
-            def match_square_bracket(text, pos_s):
-                counter = -1
-                for i in range(pos_s+1,len(text)):
-                    if text[i] == '[':
-                        counter -= 1
-                    elif text[i] == ']':
-                        counter += 1
-                    if counter == 0:
-                        return i
                 return -1
-                
-            text = re.sub("'", '"', output_text)
-            text = re.sub("\n", "", text)
-            pattern = re.compile("\[\s*\{\s*\"api\"", re.DOTALL)
 
-            search_result = re.search(pattern, text)
+        case 'ToolLearning':
+            def find_matching_bracket(text, start_pos):
+                depth = -1
+                for i in range(start_pos + 1, len(text)):
+                    if text[i] == '[': depth -= 1
+                    elif text[i] == ']': depth += 1
+                    if depth == 0: return i
+                return -1
 
-            if search_result != None:
-                pos_s = search_result.span()[0]
-                pos_e = match_square_bracket(text, pos_s)
+            clean = re.sub("'", '"', output_text).replace("\n", "")
+            search = re.search(r"\[\s*\{\s*\"api\"", clean, re.DOTALL)
+            if not search:
+                return -1
 
-                text = text[pos_s:pos_e+1]
-                # if "api" in text and "parameters" in text and "responses" in text:
-                if "api" in text and "response" in text:
-                    if "parameters" in text or "arguments" in text:
-                        try:
-                            output = json.loads(text)
-                            return output
-                        except:
-                            return -1
-                    else:
+            s, _ = search.span()
+            e = find_matching_bracket(clean, s)
+            snippet = clean[s:e+1]
+            if "api" in snippet and "response" in snippet:
+                if "parameters" in snippet or "arguments" in snippet:
+                    try:
+                        return json.loads(snippet)
+                    except:
                         return -1
-                else:
-                    return -1
-            else:
-                return -1  
+            return -1
+
         case _:
-            print("ERROR!")
+            print("ERROR: unsupported dataset")
+            return -1
 
 def transform_thought_output_format(dataset_name, output_text):
-    match dataset_name:
-        case 'ToolLearning':
-            def match_square_bracket(text, pos_s):
-                counter = -1
-                for i in range(pos_s+1,len(text)):
-                    if text[i] == '[':
-                        counter -= 1
-                    elif text[i] == ']':
-                        counter += 1
-                    if counter == 0:
-                        return i
+    if dataset_name != 'ToolLearning':
+        print("ERROR: unsupported dataset")
+        return -1
+
+    def find_matching_bracket(text, start_pos):
+        depth = -1
+        for i in range(start_pos + 1, len(text)):
+            if text[i] == '[': depth -= 1
+            elif text[i] == ']': depth += 1
+            if depth == 0: return i
+        return -1
+
+    if "Output:" in output_text:
+        clean = output_text.split("Output:",1)[1]
+    else:
+        return -1
+
+    clean = re.sub("'", '"', clean).replace("\n", "")
+    search = re.search(r"\[\s*\{\s*\"api\"", clean, re.DOTALL)
+    if not search:
+        return -1
+
+    s, _ = search.span()
+    e = find_matching_bracket(clean, s)
+    snippet = clean[s:e+1]
+    if "api" in snippet and "response" in snippet:
+        if "parameters" in snippet or "arguments" in snippet:
+            try:
+                return json.loads(snippet)
+            except:
                 return -1
-            
-            if text.find("Output:"):
-                text = text[text.find("Output:") + 8:]
-            else:
-                return -1
-            
-            text = re.sub("'", '"', output_text)
-            text = re.sub("\n", "", text)
-            pattern = re.compile("\[\s*\{\s*\"api\"", re.DOTALL)
+    return -1
 
-            search_result = re.search(pattern, text)
+def write_jsonl(path, data):
+    with open(path, 'w', encoding='utf-8') as f:
+        for entry in data:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-            if search_result != None:
-                pos_s = search_result.span()[0]
-                pos_e = match_square_bracket(text, pos_s)
+def write_json(path, data, indent=0):
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=indent)
 
-                text = text[pos_s:pos_e+1]
-                # if "api" in text and "parameters" in text and "responses" in text:
-                if "api" in text and "response" in text:
-                    if "parameters" in text or "arguments" in text:
-                        try:
-                            output = json.loads(text)
-                            return output
-                        except:
-                            return -1
-                    else:
-                        return -1
-                else:
-                    return -1
-            else:
-                return -1  
-        case _:
-            print("ERROR!")
+def read_json(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-def write_jsonl(data_path, dataset):
-    with open(data_path,'w', encoding='UTF-8') as f:
-        for data in dataset:
-            f.writelines(json.dumps(data, ensure_ascii=False))#, indent=4))
-            f.write('\n')
+def list_json_files(directory):
+    return [fn for fn in os.listdir(directory) if fn.endswith('.json')]
 
-def write_json(data_path, dataset,indent=0):
-    with open(data_path,'w', encoding='UTF-8') as f:
-            json.dump(dataset, f, ensure_ascii=False, indent=indent)
+def read_jsonl(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        return [json.loads(line) for line in f]
 
-def read_json(data_path):
-    dataset=[]
-    with open(data_path,'r', encoding='UTF-8') as f:
-        dataset = json.load(f)
-    return dataset
-
-def get_all_json_file_names(directory_path):
-    json_files = [file for file in os.listdir(directory_path) if file.endswith('.json')]
-    return json_files
-
-def read_jsonl(data_path):
-    dataset=[]
-    with open(data_path,'r', encoding='UTF-8') as f:
-        for line in f:
-            dataset.append(json.loads(line))
-    return dataset
-
-def calculate_score_ToolLearning(data_path):
-    raw_dataset = read_jsonl(data_path)
-    result_dict = {}
-
-    correct_format_num = 0
-
-    correct_api_num = 0
-    predict_api_num = 0
-    gold_api_num = 0
-
-    correct_param_num = 0
-    predict_param_num = 0
-    gold_param_num = 0
-
+def calculate_score_toollearning(data_path):
+    dataset = read_jsonl(data_path)
+    result = {}
     error_cases = []
-    error_type_counts = {
-        "格式错误": 0,
-        "缺失 API": 0,
-        "错误的 API": 0,
-        "缺失参数": 0,
-        "错误的参数值": 0
+
+    correct_format = 0
+    correct_api = 0
+    pred_api = 0
+    gold_api = 0
+    correct_param = 0
+    pred_param = 0
+    gold_param = 0
+
+    error_counts = {
+        "Format_Error": 0,
+        "Missing_API": 0,
+        "Wrong_API": 0,
+        "Missing_Parameter": 0,
+        "Wrong_Parameter_Value": 0
     }
 
-    for data in raw_dataset:
-        gold_answer = json.loads(json.dumps(eval(data['gold_data']["conversations"][1]["value"])))
+    for entry in dataset:
+        gold = json.loads(json.dumps(eval(entry['gold_data']["conversations"][1]["value"])))
+        gold_api += len(gold)
+        for api in gold:
+            gold_param += len(api['parameters'])
 
-        gold_api_num += len(gold_answer)
-        for gold_api in gold_answer:
-            gold_param_num += len(gold_api['parameters'])
+        if entry['predict'][0] != -1:
+            predict = entry['predict'][0]
+            correct_format += 1
+            entry_ok = True
 
-        if data['predict'][0] != -1:
-            predict_answer = data['predict'][0]
-            data_correct = True
-            correct_format_num += 1
-            for predict_api in predict_answer:
-                if "api" in predict_api:
-                    predict_api_num += 1
-                    if "parameters" in predict_api and type(predict_api["parameters"])==dict:
-                        predict_param_num += len(predict_api["parameters"])
-                    if "arguments" in predict_api and type(predict_api["arguments"])==dict:
-                        predict_param_num += len(predict_api["arguments"])
-                    gold_idx = -1
-                    for idx in range(len(gold_answer)):
-                        if gold_answer[idx]["api"] == predict_api["api"]:
-                            gold_idx = idx
-                            break
-                    if gold_idx != -1:
-                        correct_api_num += 1
-                        params_correct = True
-                        if "arguments" in predict_api and type(predict_api["arguments"])==dict:
-                            for parameter_name in predict_api["arguments"]:
-                                if parameter_name in gold_answer[gold_idx]["parameters"] and str(predict_api["arguments"][parameter_name]) == str(gold_answer[gold_idx]["parameters"][parameter_name]):
-                                    correct_param_num += 1
+            for api_pred in predict:
+                if "api" in api_pred:
+                    pred_api += 1
+                    params = api_pred.get("parameters", {}) or api_pred.get("arguments", {})
+                    if isinstance(params, dict):
+                        pred_param += len(params)
+                    # find matching gold index
+                    idx = next((i for i, g in enumerate(gold) if g["api"] == api_pred["api"]), -1)
+                    if idx >= 0:
+                        correct_api += 1
+                        params_ok = True
+                        for pname, pval in params.items():
+                            if pname in gold[idx]["parameters"] and str(pval) == str(gold[idx]["parameters"][pname]):
+                                correct_param += 1
+                            else:
+                                params_ok = False
+                                if pname not in gold[idx]["parameters"]:
+                                    error_counts["Missing_Parameter"] += 1
                                 else:
-                                    params_correct = False
-                                    if parameter_name not in gold_answer[gold_idx]["parameters"]:
-                                        error_type_counts["缺失参数"] += 1
-                                    else:
-                                        error_type_counts["错误的参数值"] += 1
-                        if "parameters" in predict_api and type(predict_api["parameters"])==dict:
-                            for parameter_name in predict_api["parameters"]:
-                                if parameter_name in gold_answer[gold_idx]["parameters"] and str(predict_api["parameters"][parameter_name]) == str(gold_answer[gold_idx]["parameters"][parameter_name]):
-                                    correct_param_num += 1
-                                else:
-                                    params_correct = False
-                                    if parameter_name not in gold_answer[gold_idx]["parameters"]:
-                                        error_type_counts["缺失参数"] += 1
-                                    else:
-                                        error_type_counts["错误的参数值"] += 1
-                        if not params_correct:
-                            data_correct = False
+                                    error_counts["Wrong_Parameter_Value"] += 1
+                        if not params_ok:
+                            entry_ok = False
                     else:
-                        data_correct = False
-                        error_type_counts["错误的 API"] += 1
+                        entry_ok = False
+                        error_counts["Wrong_API"] += 1
                 else:
-                    data_correct = False
-                    error_type_counts["缺失 API"] += 1
-            if not data_correct:
-                error_cases.append(data)
+                    entry_ok = False
+                    error_counts["Missing_API"] += 1
+
+            if not entry_ok:
+                error_cases.append(entry)
         else:
-            error_cases.append(data)
-            error_type_counts["格式错误"] += 1
+            error_cases.append(entry)
+            error_counts["Format_Error"] += 1
 
-    if correct_format_num > 0:
-        result_dict["AMOUNT"] = 1.0 * correct_format_num / len(raw_dataset)
+    n = len(dataset)
+    if correct_format > 0:
+        result["Format_Rate"] = round(correct_format / n * 100, 2)
+    if correct_api * pred_api * gold_api > 0:
+        p_api = correct_api / pred_api
+        r_api = correct_api / gold_api
+        result["Precision_API"] = round(p_api * 100, 2)
+        result["Recall_API"]    = round(r_api * 100, 2)
+        result["F1_API"]        = round(2 * p_api * r_api / (p_api + r_api) * 100, 2)
+    if correct_param * pred_param * gold_param > 0:
+        p_param = correct_param / pred_param
+        r_param = correct_param / gold_param
+        result["Precision_Param"] = round(p_param * 100, 2)
+        result["Recall_Param"]    = round(r_param * 100, 2)
+        result["F1_Param"]        = round(2 * p_param * r_param / (p_param + r_param) * 100, 2)
 
-    if correct_api_num * predict_api_num * gold_api_num > 0:
-        result_dict["P_api"] = 1.0 * correct_api_num / predict_api_num
-        result_dict["R_api"] = 1.0 * correct_api_num / gold_api_num
-        result_dict["F1_api"] = 2 * result_dict["P_api"] * result_dict["R_api"] / (result_dict["P_api"] + result_dict["R_api"])
-    
-    if correct_param_num * predict_param_num * gold_param_num > 0:
-        result_dict["P_param"] = 1.0 * correct_param_num / predict_param_num
-        result_dict["R_param"] = 1.0 * correct_param_num / gold_param_num
-        result_dict["F1_param"] = 2 * result_dict["P_param"] * result_dict["R_param"] / (result_dict["P_param"] + result_dict["R_param"])
+    # result["Error_Type_Counts"] = error_counts
+    return result, error_cases
 
-    result_dict["错误类型统计"] = error_type_counts
+def raw_to_pred(raw_path, label_path):
+    raw = read_json(raw_path)
+    labels = read_json(label_path)
+    output = []
+    for r, l in zip(raw, labels):
+        pred = transform_output_format("ToolLearning", r)
+        output.append({'id': l["id"], 'predict': [pred], 'gold_data': l})
+    return output
 
-    return result_dict, error_cases
-
-def raw_to_pred(raw_data_path, label_data_path):
-    raw_dataset = read_json(raw_data_path)
-    label_dataset = read_json(label_data_path)
-    pred_list = []
-    for raw_data,label_data in zip(raw_dataset,label_dataset):
-        pred_output = {
-                        'id':label_data["id"],
-                        'predict':[],
-                        'gold_data':label_data,
-                    }
-        output_text = raw_data[:]
-        pred_text = transform_output_format("ToolLearning", output_text)
-        pred_output['predict'].append(pred_text)
-        pred_list.append(pred_output)
-    return pred_list
-
-def raw_cot_to_pred(raw_data_path, label_data_path):
-    raw_dataset = read_json(raw_data_path)
-    label_dataset = read_json(label_data_path)
-    pred_list = []
-    for raw_data,label_data in zip(raw_dataset,label_dataset):
-        pred_output = {
-                        'id':label_data["id"],
-                        'predict':[],
-                        'gold_data':label_data,
-                    }
-        output_text = raw_data[:]
-        pred_text = transform_thought_output_format("ToolLearning", output_text)
-        pred_output['predict'].append(pred_text)
-        pred_list.append(pred_output)
-    return pred_list
-if __name__ == "__main__":
-    pred_folder_path = "src/data/pred_data/Seal-Tools"
-    model_name = "20250108afm20000"
-    os.makedirs('src/data/eval_result/Seal-Tools/' + model_name + '/', exist_ok=True)
-    os.makedirs('src/data/pred_data/Seal-Tools/' + model_name + '/', exist_ok=True)
-    output_dir = "src/data/eval_result/Seal-Tools/" + model_name
-    # output_dir = "src/data/eval_result/Seal-Tools/" + model_name
-    dataset_name_list = [
-                         "dev", 
-                        #  "test_in_domain", 
-                        #  "test_out_domain",
-                         ]
-
-    for dataset_name in dataset_name_list:
-        
-        # raw file to pred file
-        # raw_data_path = "src/data/pred_data/Seal-Tools" + "/" + model_name + '/raw_' + dataset_name +'.jsonl'
-        raw_data_path = "src/data/vllm_pred_data/Seal-Tools" + "/" + model_name + '/' + dataset_name +'.json'
-        label_data_path = "src/data/eval_data/Seal-Tools" +  "/" + dataset_name +'.json'
-        pred_data = raw_to_pred(raw_data_path, label_data_path)
-        pred_data_path = "src/data/pred_data/Seal-Tools" + "/" + model_name + '/pred_' + dataset_name +'.jsonl'
-        write_jsonl(pred_data_path, pred_data)
-        
-        # evaluate pred file 
-        result_path =  output_dir + '/result_' + dataset_name +'.json'
-        pred_datapath = pred_folder_path + "/" + model_name + '/pred_' + dataset_name +'.jsonl'
-        result = calculate_score_ToolLearning(pred_datapath)
-        write_json(result_path, result, indent=4)
-
-    
+def raw_cot_to_pred(raw_path, label_path):
+    raw = read_json(raw_path)
+    labels = read_json(label_path)
+    output = []
+    for r, l in zip(raw, labels):
+        pred = transform_thought_output_format("ToolLearning", r)
+        output.append({'id': l["id"], 'predict': [pred], 'gold_data': l})
+    return output
