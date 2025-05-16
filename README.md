@@ -1,6 +1,14 @@
-# ToLeaP：A **To**ol **Lea**rning **P**latform
+<div align= "center">
+    <h1> 🛠️ToLeaP：A Tool Learning Platform🛠️</h1>
+</div>
 
-## Set up the environment
+<p align="center">
+  <a href="#set-up-the-environment">Enviroment</a> •
+  <a href="#download-the-data">Data</a> •
+  <a href="#evaluate">Evaluation</a>
+</p>
+
+## ⚙️Set up the environment
 ```
 conda create -n toleap python=3.10 -y && conda activate toleap
 git clone https://github.com/Hytn/ToLeaP.git && cd ToLeap
@@ -16,7 +24,7 @@ bash ../src/benchmark/bfcl/bfcl_setup.sh
 **Note:** Please use **vllm==0.6.5**. If you want to test new models such as the **Qwen3** series, it is recommended to use the **Transformers** library instead of **vllm**. The latest version of **vllm** has some conflicts with our code implementation, which may affect the results of benchmarks such as **RoTBench**.
 
 
-## Download the data
+## ⬇️Download the data
 
 First, run 
 ```
@@ -87,7 +95,7 @@ After downloading the data, the directory structure should look like this:
 │  │  └── ...
 ```
 
-## Evaluate
+## 📊Evaluate
 First, run:
 ```
 mkdir results
