@@ -13,6 +13,9 @@ pip install mmengine # teval
 pip install nltk accelerate # injecagent
 bash ../src/benchmark/bfcl/bfcl_setup.sh
 ```
+**Note:** Please use **vllm==0.6.5**. If you want to test new models such as the **Qwen3** series, it is recommended to use the **Transformers** library instead of **vllm**. The latest version of **vllm** has some conflicts with our code implementation, which may affect the results of benchmarks such as **RoTBench**.
+
+
 ## Download the data
 
 First, run 
@@ -100,7 +103,7 @@ cd scripts
 bash one-click-evaluation.sh meta-llama/Llama-3.1-8B-Instruct false 1 256 4096 512 llama3.1
 
 ```
-If you prefer to evaluate each benchmark separately, follow the instructions below.
+If you prefer to evaluate each benchmark separately, follow the instructions below. Once `{model_name}_results.json` is generated, you can easily convert the `.json` results into `.csv` format using `json2csv.py`, making it convenient for you to fill out the form.
 
 ### RoTBench
 ```
@@ -156,9 +159,9 @@ If you want to evaluate API models, set the API key:
 3. To run the evaluation in parallel, change the `VLLM_PORT` in:
 `scripts/gorilla/berkeley-function-call-leaderboard/bfcl/constants/eval_config.py`.
 
-4. If you want to use a locally trained model, ensure the model path does not contain underscores (_).
+4. If you want to use a locally trained model, ensure the model path does not contain underscores.
 Otherwise, to avoid conflicts, manually add the following code after
-model_name_escaped = model_name.replace("_", "/"):
+`model_name_escaped = model_name.replace("_", "/")`:
 - In the `generate_leaderboard_csv` function in `scripts/gorilla/berkeley-function-call-leaderboard/bfcl/eval_checker/eval_runner_helper.py`.
 - And also in the `runner` function in `scripts/gorilla/berkeley-function-call-leaderboard/bfcl/eval_checker/eval_runner.py`.
 
