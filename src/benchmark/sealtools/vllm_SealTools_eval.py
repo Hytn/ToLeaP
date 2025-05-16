@@ -320,7 +320,7 @@ def read_jsonl(path):
     with open(path, 'r', encoding='utf-8') as f:
         return [json.loads(line) for line in f]
 
-def calculate_score_toollearning(data_path):
+def calculate_score_ToolLearning(data_path):
     dataset = read_jsonl(data_path)
     result = {}
     error_cases = []
